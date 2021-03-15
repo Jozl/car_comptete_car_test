@@ -1,8 +1,13 @@
 import os
+import datetime
+
+import pandas as pd
 
 feature_dict = {
     '车号': {
 
+    }, '采集时间': {
+        '': [0]
     }, '加速踏板位置': {
         '': [0]
     }, '电池包主负继电器状态': {
@@ -57,6 +62,19 @@ feature_dict = {
 }
 
 
+# 字符串转时间戳
+def str2ts(s):
+    ts = (datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')).timestamp()
+    return ts
+
+
+# 时间戳转字符串
+def ts2str(ts):
+    t = datetime.datetime.fromtimestamp(ts)
+    s = datetime.datetime.strftime(t, '%Y-%m-%d %H:%M:%S')
+    return s
+
+
 def data_word2num(data_list):
     res = []
 
@@ -65,43 +83,33 @@ def data_word2num(data_list):
         if feature_map and (feature in feature_map):
             feature = feature_map[feature]
         else:
-            feature = [eval(feature)]
-
+            # feature = [eval(feature) if map_key != '采集时间' else feature]
+            feature = [feature]
         res += feature
 
     return res
 
 
-def csv2list(csv_path):
-    res = []
-
-    print(csv_path)
-    with open(csv_path) as f:
-        feature_list = f.readline()
-        for data_line in f:
-            data_split = data_line.split(',')
-            # 空数据
-            if not data_split[2]:
-                continue
-            # data_split.pop(1)
-            data_split[-1] = data_split[-1][:-1]
-
-            res.append(data_split)
-
-    return res
-
-
 if __name__ == '__main__':
-    train_labels_path = '../data/train_labels.csv'
-    print(csv2list(train_labels_path))
 
-    usage = 'train'
-
-    dir_path = '../data/{}/'.format(usage)
-    csv_list = os.listdir(dir_path)
-
-    for csv_name in csv_list[:2]:
-        data_list = csv2list(dir_path + csv_name)
-        data_list = list(map(lambda x: x[:1] + x[2:], data_list))
-        for d in data_list:
-            data_word2num(d)
+    r = data_word2num([1, '2020-08-28 06:33:14', 0.0, '断开', '断开', '未踩', 'No Warning', '空置', '未系', 0.0, '手刹拉起', 'OFF', 12.43, '空档', 0.0, 123.2, 7662.0, 0.0, 0.0])
+    print(r)
+    # train_labels_path = '../data/train_labels.csv'
+    # df = pd.read_csv(train_labels_path)
+    #
+    #
+    # train_path = '../data/train/'
+    # train_csv_list = os.listdir(train_path)
+    #
+    # data_train = {}
+    # for csv_name in train_csv_list[:1]:
+    #     print(csv2list(train_path + csv_name)[0])
+    #     train_list = list(map(
+    #         lambda x: data_word2num(x),
+    #         list(map(
+    #             lambda x: x[:1] + [str2ts(x[1])] + x[2:],
+    #             csv2list(train_path + csv_name)))))
+    #
+    #     data_train[train_list[0][0]] = train_list
+    #
+    # print(data_train.keys())
